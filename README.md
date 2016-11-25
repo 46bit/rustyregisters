@@ -15,7 +15,7 @@
   }
   ```
 * **CountOnesLFSR**: LSB-of-Population-Count Fibonacci LFSR implementation.
-  * If using Rust's default shift-add chain this is a cleaner `O(t)` in the number of taps.
+  * If using [Rust's default shift-add chain](https://users.rust-lang.org/t/what-is-the-implementation-of-count-ones/4923) this is a cleaner `O(t)` in the number of taps.
     Optimised run time: 8.10s.
     ``` rust
     let tapped = self.state & self.tapmask;
