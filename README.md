@@ -6,8 +6,8 @@
 `src/bin/lfsr_benchmark.rs`: Test different implementations of a Linear Feedback Shift Register.
 
 * **NaiveLFSR**: Naive Fibonacci LFSR implementation.
-  If unoptimised each clock is `O(t)` in the number of taps.
-  Optimised run time: 7.01s.
+  Each clock operations takes time `O(t)` in the number of taps.
+
   ``` rust
   let mut feedback_bit = 0;
   for tap in self.taps.iter_mut() {
@@ -15,17 +15,31 @@
   }
   ```
 * **CountOnesLFSR**: LSB-of-Population-Count Fibonacci LFSR implementation.
-  * If using [Rust's default shift-add chain](https://users.rust-lang.org/t/what-is-the-implementation-of-count-ones/4923) this is a cleaner `O(t)` in the number of taps.
-    Optimised run time: 8.10s.
+    With [Rust's default shift-add chain](https://users.rust-lang.org/t/what-is-the-implementation-of-count-ones/4923) this is still `O(t)` in the number of taps. If using a native `POPCNT` instruction this should be `O(1)` in the number of taps.
+
     ``` rust
     let tapped = self.state & self.tapmask;
     let feedback_bit = (tapped.count_ones() & 1) as usize;
     ```
-  * If using a native `POPCNT` instruction this should be `O(1)` in the number of taps.
-    Optimised run time: 4.40s.
+* **PopCntLFSR**: inline Assembly x86_64 POPCNT for LSB-of-Population-Count Fibonacci LFSR implementation.
+    This is firmly `O(1)` in the number of taps.
 
-### Running benchmarks
+    ``` rust
+    let feedback_bit = (u64_popcnt_instruction(tapped as u64) & 1) as usize;
+    ```
 
-* NaiveLFSR: Uncomment relevant loop. Run optimised compile with `cargo build --release` then time with `time cargo run --release`.
-* CountOnesLFSR (no POPCNT): Run optimised compile with `cargo build --release` then time with `time cargo run --release`.
-* CountOnesLFSR (with POPCNT): Run optimised compile with `RUSTFLAGS="-C target-feature=+popcnt" cargo build --release` then time with `time RUSTFLAGS="-C target-feature=+popcnt" cargo run --release`.
+### Performance
+
+Time taken for `2³²` clockings on a 64-bit register with the polynomial `x⁶³ + x⁶² + x⁶⁰ + x⁵⁹ + 1`. Timings obtained on a 2.2GHz 2015 15" MBP.
+
+| Implementation | Unoptimising compile | Optimising compile | Optimising & `target-feature=+popcnt` |
+| :---           |                 ---: |               ---: |                                  ---: |
+| NaiveLFSR      | ???,???ms            | 30,000ms           | 29,000ms                              |
+| CountOnesLFSR  | 456,000ms            | 31,000ms           | **17,800ms**                          |
+| PopCntLFSR     | **450,000ms**        | **17,500ms**       | 17,900ms                              |
+
+Unoptimising compile: `cargo run`
+Optimising compile: `cargo run --release`
+Optimising compile with `target-feature=+popcnt`: `RUSTFLAGS="-C target-feature=+popcnt" cargo run --release`
+
+The `target-feature=+popcnt` flag enables the `rustc` compiler to use `POPCNT` instructions. As we can see, the resulting optimisation of `CountOnesLFSR` accelerates it slightly past my `POPCNT`-always `PopCntLFSR`.
