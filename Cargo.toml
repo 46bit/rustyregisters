@@ -1,0 +1,13 @@
+[package]
+name = "rustyregisters"
+version = "0.1.0"
+authors = ["Michael Mokrysz <hi@46b.it>"]
+
+[dependencies]
+ansi_term = "0.9"
+chan = "0.1"
+rand = "0.3"
+rayon = "0.5"
+
+[dev-dependencies]
+quickcheck = "0.2.*"
