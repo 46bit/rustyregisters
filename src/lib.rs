@@ -1,4 +1,4 @@
-#![feature(proc_macro)]
+#![feature(asm, proc_macro)]
 
 extern crate ansi_term;
 #[macro_use(chan_select)]
