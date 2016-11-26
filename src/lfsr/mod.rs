@@ -14,8 +14,10 @@ pub mod naive;
 pub mod count_ones;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod pop_cnt;
+pub mod galois;
 
 pub use naive::*;
 pub use count_ones::*;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub use pop_cnt::*;
+pub use galois::*;

@@ -58,23 +58,32 @@ impl LFSRTrait for NaiveLFSR {
 
 #[cfg(test)]
 mod tests {
-    use quickcheck::{Gen, Arbitrary, quickcheck};
     use super::*;
-    pub use lsfr::*;
-
-    impl Arbitrary for NaiveLFSR {
-        fn arbitrary<G: Gen>(g: &mut G) -> NaiveLFSR {
-            let (width, y) = Arbitrary::arbitrary(g);
-            return NaiveLFSR::new(width, taps, seed);
-        }
-    }
-
-    fn clocks_correctly_prop(l: NaiveLFSR) -> bool {
-        unimplemented!("UNsure how to check will tick correctly given mutates NaiveLFSR.")
-    }
 
     #[test]
-    fn clocks_correctly() {
-        quickcheck(clocks_correctly_prop as fn(NaiveLFSR) -> bool);
+    fn ticks_as_expected() {
+        let l1_exps = vec![1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0,
+                           1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0];
+        ticks_as_expected_prop(7, vec![0, 6], vec![0b100111], l1_exps);
+
+        let l2_exps = vec![1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0,
+                           1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,
+                           1, 1, 1, 0, 1, 0, 1];
+        ticks_as_expected_prop(11, vec![0, 9], vec![0b101101101], l2_exps);
+
+        let l3_exps = vec![1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0,
+                           1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1,
+                           1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0];
+        ticks_as_expected_prop(13, vec![0, 9, 10, 12], vec![7413], l3_exps);
+    }
+
+    fn ticks_as_expected_prop(width: usize,
+                              taps: Vec<usize>,
+                              seed: Vec<usize>,
+                              expectations: Vec<usize>) {
+        let mut lfsr = NaiveLFSR::new(width, taps, seed);
+        for expectation in expectations {
+            assert!(lfsr.clock() == expectation);
+        }
     }
 }

@@ -4,7 +4,7 @@ use lfsr::*;
 pub struct CountOnesLFSR {
     pub width: usize,
     pub taps: Vec<usize>,
-    pub tapmask: usize,
+    tapmask: usize,
     pub state: usize,
 }
 
@@ -14,7 +14,7 @@ impl CountOnesLFSR {
         CountOnesLFSR {
             width: width,
             taps: taps.clone(),
-            tapmask: CountOnesLFSR::calculate_tapmask(taps),
+            tapmask: Self::calculate_tapmask(taps),
             state: seed[0],
         }
     }
@@ -64,23 +64,15 @@ impl LFSRTrait for CountOnesLFSR {
 
 #[cfg(test)]
 mod tests {
-    use quickcheck::{Gen, Arbitrary, quickcheck};
     use super::*;
-    pub use lsfr::*;
-
-    impl Arbitrary for CountOnesLFSR {
-        fn arbitrary<G: Gen>(g: &mut G) -> CountOnesLFSR {
-            let (width, y) = Arbitrary::arbitrary(g);
-            return CountOnesLFSR::new(width, taps, seed);
-        }
-    }
-
-    fn clocks_correctly_prop(l: CountOnesLFSR) -> bool {
-        unimplemented!("UNsure how to check will tick correctly given mutates CountOnesLFSR.")
-    }
 
     #[test]
-    fn clocks_correctly() {
-        quickcheck(clocks_correctly_prop as fn(CountOnesLFSR) -> bool);
+    fn ticks_as_expected() {
+        let mut naive_lfsr = NaiveLFSR::new(7, vec![0, 1], vec![44]);
+        let mut count_ones_lfsr = CountOnesLFSR::new(7, vec![0, 1], vec![44]);
+
+        for _ in 0..32768 {
+            assert!(naive_lfsr.clock() == count_ones_lfsr.clock());
+        }
     }
 }

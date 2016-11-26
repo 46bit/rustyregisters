@@ -4,7 +4,7 @@ use lfsr::*;
 pub struct PopCntLFSR {
     pub width: usize,
     pub taps: Vec<usize>,
-    pub tapmask: usize,
+    tapmask: usize,
     pub state: usize,
 }
 
@@ -14,7 +14,7 @@ impl PopCntLFSR {
         PopCntLFSR {
             width: width,
             taps: taps.clone(),
-            tapmask: PopCntLFSR::calculate_tapmask(taps),
+            tapmask: Self::calculate_tapmask(taps),
             state: seed[0],
         }
     }
@@ -77,23 +77,15 @@ impl LFSRTrait for PopCntLFSR {
 
 #[cfg(test)]
 mod tests {
-    use quickcheck::{Gen, Arbitrary, quickcheck};
     use super::*;
-    pub use lsfr::*;
-
-    impl Arbitrary for PopCntLFSR {
-        fn arbitrary<G: Gen>(g: &mut G) -> PopCntLFSR {
-            let (width, y) = Arbitrary::arbitrary(g);
-            return PopCntLFSR::new(width, taps, seed);
-        }
-    }
-
-    fn clocks_correctly_prop(l: PopCntLFSR) -> bool {
-        unimplemented!("UNsure how to check will tick correctly given mutates PopCntLFSR.")
-    }
 
     #[test]
-    fn clocks_correctly() {
-        quickcheck(clocks_correctly_prop as fn(PopCntLFSR) -> bool);
+    fn ticks_as_expected() {
+        let mut naive_lfsr = NaiveLFSR::new(7, vec![0, 1], vec![44]);
+        let mut pop_cnt_lfsr = PopCntLFSR::new(7, vec![0, 1], vec![44]);
+
+        for _ in 0..32768 {
+            assert!(naive_lfsr.clock() == pop_cnt_lfsr.clock());
+        }
     }
 }
