@@ -30,13 +30,14 @@
 
 ### Performance
 
-Time taken for `2³²` clockings on a 64-bit register with the polynomial `x⁶³ + x⁶² + x⁶⁰ + x⁵⁹ + 1`. Timings obtained on a 2.2GHz 2015 15" MBP.
+Time taken for 2<sup>32</sup> clockings on a 64-bit register with the polynomial x<sup>63</sup> + x<sup>62</sup> + x<sup>60</sup> + x<sup>59</sup> + 1`. Timings obtained on a 2.2GHz 2015 15" MBP.
 
 | Implementation | Unoptimising compile | Optimising compile | Optimising & `target-feature=+popcnt` |
 | :---           |                 ---: |               ---: |                                  ---: |
-| NaiveLFSR      | ???,???ms            | 30,000ms           | 29,000ms                              |
-| CountOnesLFSR  | 456,000ms            | 31,000ms           | **17,800ms**                          |
-| PopCntLFSR     | **450,000ms**        | **17,500ms**       | 17,900ms                              |
+| NaiveLFSR      |          1,498,100ms |           30,000ms |                              29,000ms |
+| CountOnesLFSR  |            456,000ms |           31,000ms |                              17,800ms |
+| PopCntLFSR     |            450,000ms |           18,500ms |                              17,900ms |
+| GaloisLFSR     |        **410,628ms** |       **13,000ms** |                          **13,000ms** |
 
 Unoptimising compile: `cargo run`
 Optimising compile: `cargo run --release`
