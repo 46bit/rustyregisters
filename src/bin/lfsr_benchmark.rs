@@ -23,7 +23,7 @@ fn main() {
     let seeds = two.pow(16);
     let clocks = two.pow(16);
 
-    let galois_duration = time(GaloisLFSR::new(width, taps.clone(), vec![0]), seeds, clocks);
+    let galois_duration = time(GaloisLFSR::fibonacci(width, taps.clone(), vec![0]), seeds, clocks);
     println!("{} took {:?}ms to perform 2^32 clockings.",
              Purple.bold().paint("GaloisLFSR"),
              galois_duration.num_milliseconds());
