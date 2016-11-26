@@ -27,6 +27,12 @@
     ``` rust
     let feedback_bit = (u64_popcnt_instruction(tapped as u64) & 1) as usize;
     ```
+* **GaloisLFSR**: alternative form capable of giving the same output as ordinary Fibonacci LFSRs. Very fast in software: Feedback becomes a single XOR operation per word.
+    This is firmly `O(1)` in the number of taps.
+
+    ``` rust
+    self.state ^= (-(output_bit as isize) & self.tapmask as isize) as usize;
+    ```
 
 ### Performance
 
