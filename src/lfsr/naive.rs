@@ -1,3 +1,5 @@
+use std::mem::size_of;
+
 use lfsr::*;
 
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
@@ -9,12 +11,19 @@ pub struct NaiveLFSR {
 
 impl NaiveLFSR {
     #[allow(dead_code)]
-    pub fn new(width: usize, taps: Vec<usize>, seed: Vec<usize>) -> NaiveLFSR {
-        NaiveLFSR {
+    pub fn new(width: usize, taps: Vec<usize>, seed: Vec<usize>) -> Result<NaiveLFSR, String> {
+        if width > size_of::<usize>() * 8 {
+            return Err(format!("Unsupported: Width {} exceeded that of a single usize.",
+                               width));
+        }
+        if taps.iter().max().unwrap_or(&1) > &width {
+            return Err("Tap was outside of register width.".to_string());
+        }
+        Ok(NaiveLFSR {
             width: width,
             taps: taps,
             state: seed[0],
-        }
+        })
     }
 }
 
@@ -81,9 +90,28 @@ mod tests {
                               taps: Vec<usize>,
                               seed: Vec<usize>,
                               expectations: Vec<usize>) {
-        let mut lfsr = NaiveLFSR::new(width, taps, seed);
+        let mut lfsr = NaiveLFSR::new(width, taps, seed).unwrap();
         for expectation in expectations {
             assert!(lfsr.clock() == expectation);
+        }
+    }
+
+    #[test]
+    fn rejects_width_larger_than_usize() {
+        let usize_bytes = size_of::<usize>();
+        let usize_bits = usize_bytes * 8;
+
+        for width in (usize_bits + 1)..(usize_bits * 2 + 1) {
+            assert!(NaiveLFSR::new(width, vec![1], vec![0]).is_err())
+        }
+    }
+
+    #[test]
+    fn rejects_tap_larger_than_register() {
+        for width in 0..64 {
+            for tap in (width + 1)..64 {
+                assert!(NaiveLFSR::new(width, vec![tap], vec![0]).is_err())
+            }
         }
     }
 }

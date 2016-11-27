@@ -23,26 +23,29 @@ fn main() {
     let seeds = two.pow(16);
     let clocks = two.pow(16);
 
-    let galois_duration = time(GaloisLFSR::fibonacci(width, taps.clone(), vec![0]), seeds, clocks);
+    let galois = GaloisLFSR::fibonacci(width, taps.clone(), vec![0]).unwrap();
+    let galois_duration = time(galois, seeds, clocks);
     println!("{} took {:?}ms to perform 2^32 clockings.",
              Purple.bold().paint("GaloisLFSR"),
              galois_duration.num_milliseconds());
 
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    let pop_cnt_duration = time(PopCntLFSR::new(width, taps.clone(), vec![0]), seeds, clocks);
+    let pop_cnt = PopCntLFSR::new(width, taps.clone(), vec![0]).unwrap();
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    let pop_cnt_duration = time(pop_cnt, seeds, clocks);
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     println!("{} took {:?}ms to perform 2^32 clockings.",
              Purple.bold().paint("PopCntLFSR"),
              pop_cnt_duration.num_milliseconds());
 
-    let count_ones_duration = time(CountOnesLFSR::new(width, taps.clone(), vec![0]),
-                                   seeds,
-                                   clocks);
+    let count_ones = CountOnesLFSR::new(width, taps.clone(), vec![0]).unwrap();
+    let count_ones_duration = time(count_ones, seeds, clocks);
     println!("{} took {:?}ms to perform 2^32 clockings.",
              Purple.bold().paint("CountOnesLFSR"),
              count_ones_duration.num_milliseconds());
 
-    let naive_duration = time(NaiveLFSR::new(width, taps.clone(), vec![0]), seeds, clocks);
+    let naive = NaiveLFSR::new(width, taps.clone(), vec![0]).unwrap();
+    let naive_duration = time(naive, seeds, clocks);
     println!("{} took {:?}ms to perform 2^32 clockings.",
              Purple.bold().paint("NaiveLFSR"),
              naive_duration.num_milliseconds());
