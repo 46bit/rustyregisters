@@ -18,7 +18,7 @@ fn main() {
 
     let two = 2 as usize;
     let width = 64;
-    let taps = vec![64 - 1, 63 - 1, 61 - 1, 60 - 1];
+    let taps = vec![64, 63, 61, 60];
 
     let seeds = two.pow(16);
     let clocks = two.pow(16);

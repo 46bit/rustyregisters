@@ -33,13 +33,13 @@ impl GaloisLFSR {
     fn calculate_tapmask(taps: Vec<usize>) -> usize {
         let mut tapmask = 0;
         for tap in taps {
-            tapmask |= (1 as usize) << tap;
+            tapmask |= (1 as usize) << (tap - 1);
         }
         return tapmask;
     }
 
     fn mirror_taps(width: usize, taps: Vec<usize>) -> Vec<usize> {
-        taps.into_iter().map(|tap| width - 1 - tap).collect()
+        taps.into_iter().map(|tap| width - tap + 1).collect()
     }
 }
 
@@ -84,8 +84,8 @@ mod tests {
 
     #[test]
     fn ticks_as_expected() {
-        let mut naive_lfsr = NaiveLFSR::new(7, vec![0, 1], vec![44]);
-        let mut galois_lfsr = GaloisLFSR::fibonacci(7, vec![0, 1], vec![44]);
+        let mut naive_lfsr = NaiveLFSR::new(7, vec![1, 2], vec![44]);
+        let mut galois_lfsr = GaloisLFSR::fibonacci(7, vec![1, 2], vec![44]);
 
         for i in 0..32768 {
             println!("{}", i);

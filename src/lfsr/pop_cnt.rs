@@ -22,7 +22,7 @@ impl PopCntLFSR {
     fn calculate_tapmask(taps: Vec<usize>) -> usize {
         let mut tapmask = 0;
         for tap in taps {
-            tapmask |= (1 as usize) << tap;
+            tapmask |= (1 as usize) << (tap - 1);
         }
         return tapmask;
     }
@@ -81,8 +81,8 @@ mod tests {
 
     #[test]
     fn ticks_as_expected() {
-        let mut naive_lfsr = NaiveLFSR::new(7, vec![0, 1], vec![44]);
-        let mut pop_cnt_lfsr = PopCntLFSR::new(7, vec![0, 1], vec![44]);
+        let mut naive_lfsr = NaiveLFSR::new(7, vec![1, 2], vec![44]);
+        let mut pop_cnt_lfsr = PopCntLFSR::new(7, vec![1, 2], vec![44]);
 
         for _ in 0..32768 {
             assert!(naive_lfsr.clock() == pop_cnt_lfsr.clock());

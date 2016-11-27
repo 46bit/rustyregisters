@@ -25,7 +25,7 @@ impl LFSRTrait for NaiveLFSR {
         for tap in self.taps.iter_mut() {
             // @TODO: Understand exactly why I need to clone tap.
             // Without clone: the trait `std::ops::Shr<&mut usize>` is not implemented for `usize`
-            feedback_bit ^= (self.state >> tap.clone()) & 1;
+            feedback_bit ^= (self.state >> (tap.clone() - 1)) & 1;
         }
         self.state = (self.state >> 1) | (feedback_bit << (self.width - 1));
         output_bit
@@ -64,17 +64,17 @@ mod tests {
     fn ticks_as_expected() {
         let l1_exps = vec![1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0,
                            1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0];
-        ticks_as_expected_prop(7, vec![0, 6], vec![0b100111], l1_exps);
+        ticks_as_expected_prop(7, vec![1, 7], vec![0b100111], l1_exps);
 
         let l2_exps = vec![1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0,
                            1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1,
                            1, 1, 1, 0, 1, 0, 1];
-        ticks_as_expected_prop(11, vec![0, 9], vec![0b101101101], l2_exps);
+        ticks_as_expected_prop(11, vec![1, 10], vec![0b101101101], l2_exps);
 
         let l3_exps = vec![1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0,
                            1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1,
                            1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0];
-        ticks_as_expected_prop(13, vec![0, 9, 10, 12], vec![7413], l3_exps);
+        ticks_as_expected_prop(13, vec![1, 10, 11, 13], vec![7413], l3_exps);
     }
 
     fn ticks_as_expected_prop(width: usize,
