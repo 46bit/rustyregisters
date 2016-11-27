@@ -7,7 +7,7 @@ pub struct GaloisLFSR {
     pub width: usize,
     pub taps: Vec<usize>,
     tapmasks: Vec<usize>,
-    pub state: usize,
+    pub state: Vec<usize>,
 }
 
 impl GaloisLFSR {
@@ -16,14 +16,15 @@ impl GaloisLFSR {
     #[allow(dead_code)]
     pub fn new(width: usize, taps: Vec<usize>, seed: Vec<usize>) -> Result<GaloisLFSR, String> {
         if width > size_of::<usize>() * 8 {
-            return Err(format!("Unsupported: Width {} exceeded that of a single usize.", width));
+            return Err(format!("Unsupported: Width {} exceeded that of a single usize.",
+                               width));
         }
         let tapmasks = calculate_tapmasks(width, taps.clone())?;
         Ok(GaloisLFSR {
             width: width,
             taps: taps,
             tapmasks: tapmasks,
-            state: seed[0],
+            state: seed,
         })
     }
 
@@ -49,11 +50,11 @@ impl GaloisLFSR {
 
 impl LFSRTrait for GaloisLFSR {
     fn clock(&mut self) -> usize {
-        let output_bit = self.state & 1;
-        self.state >>= 1;
+        let output_bit = self.state[0] & 1;
+        self.state[0] >>= 1;
         // https://en.wikipedia.org/wiki/Linear-feedback_shift_register#Galois_LFSRs suggested this
         // routine, which I tweaked to suit Rust typing.
-        self.state ^= (-(output_bit as isize) & self.tapmasks[0] as isize) as usize;
+        self.state[0] ^= (-(output_bit as isize) & self.tapmasks[0] as isize) as usize;
         output_bit
     }
 
@@ -66,11 +67,11 @@ impl LFSRTrait for GaloisLFSR {
     }
 
     fn get(&self) -> Vec<usize> {
-        vec![self.state]
+        self.state.clone()
     }
 
     fn set(&mut self, value: Vec<usize>) {
-        self.state = value[0];
+        self.state = value;
     }
 
     fn taps(&self) -> Vec<usize> {

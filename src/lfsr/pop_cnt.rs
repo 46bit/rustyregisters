@@ -7,7 +7,7 @@ pub struct PopCntLFSR {
     pub width: usize,
     pub taps: Vec<usize>,
     tapmasks: Vec<usize>,
-    pub state: usize,
+    pub state: Vec<usize>,
 }
 
 impl PopCntLFSR {
@@ -22,7 +22,7 @@ impl PopCntLFSR {
             width: width,
             taps: taps,
             tapmasks: tapmasks,
-            state: seed[0],
+            state: seed,
         })
     }
 }
@@ -42,10 +42,10 @@ fn u64_popcnt_instruction(value: u64) -> u32 {
 
 impl LFSRTrait for PopCntLFSR {
     fn clock(&mut self) -> usize {
-        let output_bit = self.state & 1;
-        let tapped = self.state & self.tapmasks[0];
+        let output_bit = self.state[0] & 1;
+        let tapped = self.state[0] & self.tapmasks[0];
         let feedback_bit = (u64_popcnt_instruction(tapped as u64) & 1) as usize;
-        self.state = (self.state >> 1) | (feedback_bit << (self.width - 1));
+        self.state[0] = (self.state[0] >> 1) | (feedback_bit << (self.width - 1));
         output_bit
     }
 
@@ -58,11 +58,11 @@ impl LFSRTrait for PopCntLFSR {
     }
 
     fn get(&self) -> Vec<usize> {
-        vec![self.state]
+        self.state.clone()
     }
 
     fn set(&mut self, value: Vec<usize>) {
-        self.state = value[0];
+        self.state = value;
     }
 
     fn taps(&self) -> Vec<usize> {

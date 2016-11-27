@@ -6,7 +6,7 @@ use lfsr::*;
 pub struct NaiveLFSR {
     pub width: usize,
     pub taps: Vec<usize>,
-    pub state: usize,
+    pub state: Vec<usize>,
 }
 
 impl NaiveLFSR {
@@ -22,21 +22,21 @@ impl NaiveLFSR {
         Ok(NaiveLFSR {
             width: width,
             taps: taps,
-            state: seed[0],
+            state: seed,
         })
     }
 }
 
 impl LFSRTrait for NaiveLFSR {
     fn clock(&mut self) -> usize {
-        let output_bit = self.state & 1;
+        let output_bit = self.state[0] & 1;
         let mut feedback_bit = 0;
         for tap in self.taps.iter_mut() {
             // @TODO: Understand exactly why I need to clone tap.
             // Without clone: the trait `std::ops::Shr<&mut usize>` is not implemented for `usize`
-            feedback_bit ^= (self.state >> (tap.clone() - 1)) & 1;
+            feedback_bit ^= (self.state[0] >> (tap.clone() - 1)) & 1;
         }
-        self.state = (self.state >> 1) | (feedback_bit << (self.width - 1));
+        self.state[0] = (self.state[0] >> 1) | (feedback_bit << (self.width - 1));
         output_bit
     }
 
@@ -49,11 +49,11 @@ impl LFSRTrait for NaiveLFSR {
     }
 
     fn get(&self) -> Vec<usize> {
-        vec![self.state]
+        self.state.clone()
     }
 
     fn set(&mut self, value: Vec<usize>) {
-        self.state = value[0];
+        self.state = value;
     }
 
     fn taps(&self) -> Vec<usize> {
