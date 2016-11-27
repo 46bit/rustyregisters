@@ -46,15 +46,21 @@ impl GaloisLFSR {
         }
         Ok(taps.into_iter().map(|tap| width - tap + 1).collect())
     }
+
+    fn clock_word(mut word: usize, tapmask: usize) -> (usize, usize) {
+        let output_bit = word & 1;
+        word >>= 1;
+        // https://en.wikipedia.org/wiki/Linear-feedback_shift_register#Galois_LFSRs suggested this
+        // routine, which I tweaked to suit Rust typing.
+        word ^= (-(output_bit as isize) & tapmask as isize) as usize;
+        (word, output_bit)
+    }
 }
 
 impl LFSRTrait for GaloisLFSR {
     fn clock(&mut self) -> usize {
-        let output_bit = self.state[0] & 1;
-        self.state[0] >>= 1;
-        // https://en.wikipedia.org/wiki/Linear-feedback_shift_register#Galois_LFSRs suggested this
-        // routine, which I tweaked to suit Rust typing.
-        self.state[0] ^= (-(output_bit as isize) & self.tapmasks[0] as isize) as usize;
+        let (word, output_bit) = Self::clock_word(self.state[0], self.tapmasks[0]);
+        self.state[0] = word;
         output_bit
     }
 
